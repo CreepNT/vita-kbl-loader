@@ -8,6 +8,9 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
   endif()
 endif()
 
+set(TARGET_FW "FW_365")
+set(FORCE_SD0_BOOT_PATCHES 1)
+
 project(vita-kbl-loader)
 
 add_subdirectory(payload_scratchpad)

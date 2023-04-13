@@ -200,7 +200,6 @@ void dipsw_set(void *pDipsw, SceUInt8 bit){
 int loader_main(void){
 
 	SceKblParam *pKblParam;
-	uintptr_t image_paddr = 0;
 	SceUID fd, memid;
 	void *base;
 	int is_do_patch;
@@ -220,7 +219,7 @@ int loader_main(void){
 	if(pKblParam == NULL)
 		return -1;
 
-	if(1 /*ksceSblAimgrIsTool() != 0*/){
+	if(ksceSblAimgrIsTool() != 0){
 		dipsw_set(&(pKblParam->dipsw), 0xD7); // Allow remote
 		pKblParam->dipsw.aslr_seed = 0; // Disable ASLR
 

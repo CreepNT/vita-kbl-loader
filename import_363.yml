@@ -1,0 +1,11 @@
+version: 2
+firmware: 3.63
+modules:
+  SceSysmem:
+    libraries:
+      SceCpuForKernel:
+        nid: 0xA5195D20
+        functions:
+          ksceKernelCorelockInitialize: 0xA65F6F14
+          ksceKernelCorelockLock: 0x2FF54320
+          ksceKernelCorelockUnlock: 0xFE2B77A3

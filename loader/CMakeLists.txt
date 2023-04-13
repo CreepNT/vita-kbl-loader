@@ -37,9 +37,18 @@ add_executable(${PROJECT_NAME}
 add_dependencies(${PROJECT_NAME} payload_scratchpad_binary)
 add_dependencies(${PROJECT_NAME} payload_boot_binary)
 
+if (${TARGET_FW} STREQUAL "FW_360")
+  target_link_libraries(${PROJECT_NAME}
+    SceCpuForKernel_stub
+  )
+elseif(${TARGET_FW} STREQUAL "FW_365")
+  target_link_libraries(${PROJECT_NAME}
+    SceCpuForKernel_363_stub
+  )
+endif()
+
 target_link_libraries(${PROJECT_NAME}
   SceCpuForDriver_stub
-  SceCpuForKernel_stub
   SceDebugForDriver_stub
   SceDmacmgrForDriver_stub
   SceIofilemgrForDriver_stub
@@ -49,7 +58,7 @@ target_link_libraries(${PROJECT_NAME}
   SceSysmemForDriver_stub
   ScePowerForDriver_stub
   SceThreadmgrForDriver_stub
-  taihenForKernel_stub
+  taihenForKernel_stub 
 )
 
 set_target_properties(${PROJECT_NAME}

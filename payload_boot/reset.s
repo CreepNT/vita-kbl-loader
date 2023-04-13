@@ -4,6 +4,26 @@
 	.text
 	.balign 4
 
+#if defined(FW_360)
+	.set RET2LOAD_ADDR, 0x510012E8
+	@For the ADDROF, take address of the function and add 0xD.
+	@For the jmp_target, take the destination of BNE.
+	.set sceSblAuthMgrAuthHeader_ADDROF, 0x51016D75
+	.set sceSblAuthMgrSetupAuthSegment_ADDROF, 0x51016E65
+	.set sceSblAuthMgrSetupAuthSegment_jmp_target, 0x51016E88
+	.set sceSblAuthMgrAuthSegment_ADDROF, 0x51016EA1
+	.set sceSblAuthMgrAuthSegment_jmp_target, 0x51016F1C
+#elif defined(FW_365)
+	.set RET2LOAD_ADDR, 0x510012E8
+	.set sceSblAuthMgrAuthHeader_ADDROF, 0x51016EB1
+	.set sceSblAuthMgrSetupAuthSegment_ADDROF, 0x51016FA1
+	.set sceSblAuthMgrSetupAuthSegment_jmp_target, 0x51016FC4
+	.set sceSblAuthMgrAuthSegment_ADDROF, 0x51016FDD
+	.set sceSblAuthMgrAuthSegment_jmp_target, 0x51017058
+#else
+	Invalid firmware
+#endif
+
 	.global _start
 	.type   _start, %function
 	.section .text._start
@@ -27,13 +47,13 @@ psp2bootconfig_load_hook:
 	pop {r0, r2, r3}
 
 return2load_kernel:
-	@ 0x510012e8 on 3.60
+	@Same instructions for 3.60 and 3.65 were overwritten
 	movt r0, #0x5116
 	movt r3, #0x5102
 	mov r1, #0x110000
 
-	movw ip, #:lower16:0x510012e8
-	movt ip, #:upper16:0x510012e8
+	movw ip, #:lower16:RET2LOAD_ADDR
+	movt ip, #:upper16:RET2LOAD_ADDR
 	add ip, #0xC @ Back to original code
 	orr ip, #1   @ Thumb
 	blx ip
@@ -48,8 +68,8 @@ sceSblAuthMgrAuthHeader_patch:
 	mov r7, r2
 	mov r4, r3
 
-	movw ip, #:lower16:0x51016d75
-	movt ip, #:upper16:0x51016d75
+	movw ip, #:lower16:sceSblAuthMgrAuthHeader_ADDROF
+	movt ip, #:upper16:sceSblAuthMgrAuthHeader_ADDROF
 
 	bx ip
 
@@ -62,11 +82,11 @@ sceSblAuthMgrSetupAuthSegment_patch:
 	mov r5, r1
 
 	// Must to not jump
-	bne 0x51016e88
+	bne sceSblAuthMgrSetupAuthSegment_jmp_target
 	movw  r3, #0xf0f8
 
-	movw ip, #:lower16:0x51016e65
-	movt ip, #:upper16:0x51016e65
+	movw ip, #:lower16:sceSblAuthMgrSetupAuthSegment_ADDROF
+	movt ip, #:upper16:sceSblAuthMgrSetupAuthSegment_ADDROF
 
 	bx ip
 
@@ -80,9 +100,9 @@ sceSblAuthMgrAuthSegment_patch:
 	mov  r6, r2
 
 	// Must to not jump
-	bne 0x51016f1c
+	bne sceSblAuthMgrAuthSegment_jmp_target
 
-	movw ip, #:lower16:0x51016ea1
-	movt ip, #:upper16:0x51016ea1
+	movw ip, #:lower16:sceSblAuthMgrAuthSegment_ADDROF
+	movt ip, #:upper16:sceSblAuthMgrAuthSegment_ADDROF
 
 	bx ip

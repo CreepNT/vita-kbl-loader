@@ -51,6 +51,12 @@ void *sceSdifGetSdContextPartValidateMmc(int type){
 	return *(void **)(sdif_ctx + 0x2414);
 }
 
+#if defined(FW_360)
+#define SECTOR_REDIRECT_PATCH_ADDR 0x510200C0
+#elif defined(FW_365)
+#define SECTOR_REDIRECT_PATCH_ADDR 0x510202CE
+#endif
+
 int enso_first_patch(void){
 
 	// A patch to Enso sector redirection
@@ -69,9 +75,9 @@ int enso_first_patch(void){
 					sceSdifReadSectorMmc(sdif_emmc_ctx, pMbr->entries[i].start_lba, (void *)0x51400200, 1);
 
 					if(*(uint16_t *)(0x51400200 + 0xB) != 0x200){
-						*(uint16_t *)(0x510200C6) = 0x2101; // movs r1, #1
+						*(uint16_t *)(SECTOR_REDIRECT_PATCH_ADDR) = 0x2101; // movs r1, #1
 
-						clean_dcache((void *)0x510200C0, 0x20);
+						clean_dcache((void *)(SECTOR_REDIRECT_PATCH_ADDR & ~0x3F), 0x20);
 						flush_icache();
 					}
 
@@ -138,7 +144,7 @@ int psp2bootconfig_load_hook_main(void){
 }
 
 int boot_main(void){
-
+	sceKernelPrintf("%s: start.\n", __FUNCTION__);
 	uintptr_t patch_func;
 	int opcode[3];
 
@@ -149,6 +155,7 @@ int boot_main(void){
 
 	opcode[2] = 0xBF004788; // blx r1, nop
 
+	//Offset doesn't change between 3.60 and 3.65
 	memcpy((void *)0x510012e8, opcode, sizeof(opcode));
 	clean_dcache((void *)0x510012e0, 0x20);
 	flush_icache();

@@ -36,7 +36,6 @@ static void* (*const ReferModuleObject)(int) = (void*)(0x51017784 | 1);
 #define sceSblAuthMgrSetupAuthSegment_ADDROF 0x51016E58
 #define sceSblAuthMgrAuthSegment_ADDROF 0x51016E94
 
-
 static void* (*const ReferModuleObject)(int) = (void*)(0x51017648 | 1);
 #else
 #error Unsupported firmware.
@@ -88,7 +87,8 @@ static int sceKernelLoadModule(const char *path, int flags, void *option){
 			sceKernelPrintf("%s res:0x%X %s 0x%X\n", __FUNCTION__, res, path, flags);
 		}
 
-		if (FORCE_SD0_BOOT_PATCHES && res > 0 && strncmp(path + 4, "kd/sysstagemgr.skprx", 25) == 0) { //Patch sysstatemgr
+		if (FORCE_SD0_BOOT_PATCHES && res > 0 && strncmp(path + 4, "kd/sysstatemgr.skprx", 25) == 0) { //Patch sysstatemgr
+			sceKernelPrintf("Patching SceSysStateMgr...\n");
 			//Obtain module's .text base
 			uintptr_t pModule = (uintptr_t)ReferModuleObject(res);
 			uintptr_t seg0Base = *((uintptr_t*)(pModule + MODOBJ_SEG0_BASE_VADDR_OFFSET));
@@ -99,7 +99,9 @@ static int sceKernelLoadModule(const char *path, int flags, void *option){
 			uint32_t dacr;
 			__asm__ volatile("mrc p15, 0, %0, c3, c0, 0" : "=r"(dacr));
 			__asm__ volatile("mcr p15, 0, %0, c3, c0, 0" :: "r"(0xFFFFFFFF));
-			*(uint32_t*)(seg0Base + SSM_BLX_ISEXTBOOTMODE_OFFSET) = movw_r0_1;
+			//Uncomment to skip bootimage mounting
+			//WARNING: this will cause boot to hang with default System Configuration Script!
+			//*(uint32_t*)(seg0Base + SSM_BLX_ISEXTBOOTMODE_OFFSET) = movw_r0_1;
 			*(uint32_t*)(seg0Base + SSM_BLX_ISMANUFMODE_OFFSET) = movw_r0_1;
 			*(uint32_t*)(seg0Base + SSM_BLX_ISDECRYPTALLOW_OFFSET) = movw_r0_1;
 			__asm__ volatile("mcr p15, 0, %0, c3, c0, 0" :: "r"(dacr));

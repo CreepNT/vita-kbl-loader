@@ -40,9 +40,11 @@ Also, if you accidentally execute broken code and get stuck with a software rebo
 
 # Building
 
-Define either `FW_360` or `FW_365` in `payload_boot/CMakeLists.txt`.
+Define `TARGET_FW` as either `FW_360` or `FW_365` in `CMakeLists.txt`.
 
 Define `FORCE_SD0_BOOT_PATCHES` to 1 to enable forced os0->sd0 redirection.
+
+When building for firmware 3.65, you may need to build extra stubs (`mkdir extra && vita-libs-gen -c import_365.yml extra`) and link against resulting `.a`.
 
 NOTE: When `FORCE_SD0_BOOT_PATCHES` is defined as 1, the following behaviour is changed in `sysstatemgr.skprx`:
     * Text format system configuration scripts are allowed.
