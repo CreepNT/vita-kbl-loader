@@ -38,6 +38,17 @@ Also because it needs cleanup, not yet compatible with "dumped" NSKBL.
 
 Also, if you accidentally execute broken code and get stuck with a software reboot, you can easily recover by resetting the hardware because the original NSKBL etc, will be loaded.
 
+# Building
+
+Define either `FW_360` or `FW_365` in `payload_boot/CMakeLists.txt`.
+
+Define `FORCE_SD0_BOOT_PATCHES` to 1 to enable forced os0->sd0 redirection.
+
+NOTE: When `FORCE_SD0_BOOT_PATCHES` is defined as 1, the following behaviour is changed in `sysstatemgr.skprx`:
+    * Text format system configuration scripts are allowed.
+    * `sd0:psp2config.skprx` and `ux0:psp2config.skprx` are attempted to be used as system configuration script.
+    * The `MANUFACTURING_MODE` predicate always evaluates to 1.
+
 # Information
 
 [Resume](https://wiki.henkaku.xyz/vita/Suspend#Rebooting_with_Patches)

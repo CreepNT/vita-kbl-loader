@@ -11,7 +11,7 @@ endif()
 project(payload_boot C ASM)
 include("${VITASDK}/share/vita.cmake" REQUIRED)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,-q -Wall -O2 -mcpu=cortex-a9 -mthumb-interwork -fno-builtin -Wno-main -DFW_360")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,-q -Wall -O2 -mcpu=cortex-a9 -mthumb-interwork -fno-builtin -Wno-main -DFW_365 -DFORCE_SD0_BOOT_PATCHES=1")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${CMAKE_CURRENT_SOURCE_DIR}/link.x -nostartfiles -nodefaultlibs -nostdlib")
 

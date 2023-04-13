@@ -44,7 +44,9 @@ typedef struct SceKblFsReadCtx { // size is 0x5C-bytes
 	SceKblSdifCtx *pSceKblSdifCtx;
 } SceKblFsReadCtx;
 
-#define FW_360
+void sceKernelICacheInvalidateAll(void);
+void ksceKernelCpuDcacheCleanMVACRange(void *base, int range);
+SceUID loadModuleCommon(ScePID pid, const char *path, int flags, void *option);
 
 #ifdef FW_360
 
@@ -64,12 +66,9 @@ static int (* init_dev_fs)(void) = (void *)(0x5100124D);
 // flags : if have 0x10000, need SCE MBR, else Raw FAT16
 // static int (* fat_init_dev)(SceKblFsReadCtx *a1, int flags, const void *cb, SceKblSdifCtx *a4) = (void*)(0x5101FD19);
 
-void ksceKernelCpuDcacheCleanMVACRange(void *base, int range);
-void ksceKernelCpuIcacheInvalidateAllUIS(void);
+#define sceKernelPrintf ((__typeof__(&ksceKernelPrintf))0x510137A9)
 
-#define sceKernelPrintf ((__typeof__(&ksceDebugPrintf))0x510137A9)
-
-#define flush_icache() ((__typeof__(&ksceKernelCpuIcacheInvalidateAllUIS))0x51014521)()
+#define flush_icache() ((__typeof__(&sceKernelICacheInvalidateAll))0x51014521)()
 #define clean_dcache(base, range) ((__typeof__(&ksceKernelCpuDcacheCleanMVACRange))0x5101456D)(base, range)
 
 #define strncmp(_s1_, _s2_, _len_) ((__typeof__(&strncmp))0x51013B30)(_s1_, _s2_, _len_)
@@ -124,9 +123,41 @@ static SceSize (* strnlen)(const char *s, SceSize maxlen) = (void *)(0x51013B81)
 static char *(* strncpy)(char *dst, const char *src, SceSize len) = (void *)(0x510144A1);
 */
 
-SceUID sceKernelLoadModuleForPidInternal(SceUID pid, const char *path, int flags, void *option);
+#define sceKernelLoadModuleForPidInternal(pid, path, flags, option) ((__typeof__(&loadModuleCommon))0x51017831)(pid, path, flags, option)
 
-#define sceKernelLoadModuleForPidInternal(pid, path, flags, option) ((__typeof__(&sceKernelLoadModuleForPidInternal))0x51017831)(pid, path, flags, option)
+#elif defined(FW_365)
+
+#define pSdifCtxForGcsd ((SceKblSdifCtx *)0x51028018)
+
+#define sceKernelPrintf ((__typeof__(&ksceKernelPrintf))0x51013919)
+
+#define flush_icache() ((__typeof__(&sceKernelICacheInvalidateAll))0x51014691)()
+#define clean_dcache(base, range) ((__typeof__(&ksceKernelCpuDcacheCleanMVACRange))  0x510146DD)(base, range)
+
+#define strncmp(_s1_, _s2_, _len_) ((__typeof__(&strncmp))0x51013CA1)(_s1_, _s2_, _len_)
+#define memset(dst, ch, len) ((__typeof__(&memset))0x51013C41)(dst, ch, len)
+#define memcpy(dst, src, len) ((__typeof__(&memcpy))0x51013BC1)(dst, src, len)
+
+#define sceSblAimgrIsTool() ((int (*)(void))0x51017275)()
+
+/*
+ * SceSdif
+ */
+#define SCE_SDIF_DEV_GAME_CARD 1
+
+#define sceSdifReadSectorMmc(_ctx_, _sector_pos_, _data_, _nSector_) \
+	((int (*)(void *ctx, SceSize sector_pos, void *data, SceSize nSector))  0x5101C7D1)(_ctx_, _sector_pos_, _data_, _nSector_)
+
+#define sceSdifGetSdContextGlobal(_type_) ((void *(*)(int type))0x5101ABF9)(_type_)
+#define sceSdifInitializeSdDevice(_sd_ctx_index_, _result_) ((int (*)(int sd_ctx_index, void **result))0x5101DA29)(_sd_ctx_index_, _result_)
+
+
+#define sceKernelAllocMemBlock(name, type, size, opt) ((__typeof__(&ksceKernelAllocMemBlock))0x51007161)(name, type, size, opt)
+#define sceKernelGetMemBlockBase(memid, base) ((__typeof__(&ksceKernelGetMemBlockBase))0x510057E1)(memid, base)
+#define sceKernelRemapBlock(memid, memtype) ((__typeof__(&ksceKernelRemapBlock))0x51007171)(memid, memtype)
+
+#define sceKernelLoadModuleForPidInternal(pid, path, flags, option) ((__typeof__(&loadModuleCommon))0x5101796D)(pid, path, flags, option)
+
 
 #else
 #error "No firmware defined or firmware not supported."

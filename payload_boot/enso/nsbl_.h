@@ -64,8 +64,15 @@ typedef struct SceModuleSelfSectionInfo {
   uint32_t unknown2;
 } __attribute__((packed)) SceModuleSelfSectionInfo;
 
-#ifdef FW_360
+#if defined(FW_360) || defined(FW_365)
+#define SYSSTATE_IS_MANUFACTURING_MODE_OFFSET (0x1500)
+#define SYSSTATE_IS_DEV_MODE_OFFSET           (0xE28)
+#define SYSSTATE_IS_QAF_082A4FC2_OFFSET       (0x86)
+#define SYSSTATE_PATH_CHECK                   (0x4A0)
+#define SYSSTATE_RET_CHECK_BUG                (0xD92)
+#endif
 
+#if defined(FW_360)
 // firmware specific internal structures
 
 typedef struct SceBootArgs {
@@ -291,18 +298,14 @@ static void **module_load_func_ptr = (void *)0x51027630;
 
 #define SBLAUTHMGR_OFFSET_PATCH_ARG (168)
 
-#define SYSSTATE_IS_MANUFACTURING_MODE_OFFSET (0x1500)
-#define SYSSTATE_IS_DEV_MODE_OFFSET           (0xE28)
-#define SYSSTATE_IS_QAF_082A4FC2_OFFSET       (0x86)
-#define SYSSTATE_PATH_CHECK                   (0x4A0)
-#define SYSSTATE_RET_CHECK_BUG                (0xD92)
-
 static const uint8_t sysstate_ret_patch[] = {0x13, 0x22, 0xc8, 0xf2, 0x01, 0x02};
 
 static const char host0_psp2config_path[] = "host0:psp2config.txt";
 static const char sd0_psp2config_path[] = "sd0:boot_config.txt";
 static const char ur0_psp2config_path[] = "ur0:tai/boot_config.txt";
 
+#elif defined(FW_365)
+//TODO
 #else
 #error "No firmware defined or firmware not supported."
 #endif
